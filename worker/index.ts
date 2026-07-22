@@ -5,6 +5,8 @@ import handler from "vinext/server/app-router-entry";
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  /** Optional, enabled only after a scoped Workers VPC Service is provisioned. */
+  PRIVATE_API?: Fetcher;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {

@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { StoreFooter, StoreHeader } from "../../components/Storefront";
+import { journal } from "../../storefront-data";
+export default async function Page({params}:{params:Promise<{slug:string}>}){ const {slug}=await params; const story=journal.find(x=>x.slug===slug)??journal[0]; return <main className="ia-site"><StoreHeader/><section className="ia-page-hero journal"><span>{story.kind.toUpperCase()}</span><h1>{story.title}</h1><p>{story.copy}</p></section><section className="ia-manifesto"><p>FIELD TRANSMISSION / ISSUE 001</p><h2>THE WORK<br/>DOES NOT<br/><i>NEED A WITNESS.</i></h2><span>This is the opening editorial framework for Inner Animals: firsthand stories, useful training ideas, material studies and honest profiles from people doing the work. The final story will be authored in the CMS before the first public drop.</span><Link href="/journal">Return to the journal</Link></section><StoreFooter/></main> }
