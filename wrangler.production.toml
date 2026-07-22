@@ -1,0 +1,41 @@
+name = "inneranimals"
+main = "./worker/index.ts"
+compatibility_date = "2025-07-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ── Assets ────────────────────────────────────────────────────────────────────
+# vinext builds Next.js output — static assets served from the .next dir
+[assets]
+binding = "ASSETS"
+directory = "./.next/static"
+
+# ── D1 ────────────────────────────────────────────────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "inneranimal"
+database_id = "5a83c57d-945d-4e09-81f1-f5cd8e72e32e"
+
+# ── R2 ────────────────────────────────────────────────────────────────────────
+[[r2_buckets]]
+binding = "ASSETS_BUCKET"
+bucket_name = "cms"
+
+# ── KV ────────────────────────────────────────────────────────────────────────
+[[kv_namespaces]]
+binding = "SESSION_CACHE"
+id = "dc87920b0a9247979a213c09df9a0234"
+
+# ── Hyperdrive ────────────────────────────────────────────────────────────────
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "08183bb9d2914e87ac8395d7e4ecff60"
+
+# ── Browser Run ───────────────────────────────────────────────────────────────
+[browser]
+binding = "MYBROWSER"
+
+# ── Routes / Custom Domain ────────────────────────────────────────────────────
+# inneranimals.com is already attached as a custom domain in the CF dashboard.
+# No routes block needed — custom domain routing is managed in the dashboard.
+# Worker URL: inneranimals.meauxbility.workers.dev
+# Custom domain: inneranimals.com (Production, zone: 5b12f720efb2baaa47a96cd7977de25b)
