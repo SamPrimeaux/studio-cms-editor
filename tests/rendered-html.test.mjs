@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const developmentPreviewMeta =
@@ -30,4 +31,22 @@ test("renders development preview metadata", async () => {
     /^text\/html\b/i,
   );
   assert.match(await response.text(), developmentPreviewMeta);
+});
+
+test("keeps public pages scrollable while the studio shell stays fixed", async () => {
+  const css = await readFile(
+    new URL("../app/globals.css", import.meta.url),
+    "utf8",
+  );
+
+  assert.doesNotMatch(
+    css,
+    /html,body\{[^}]*height:100%;[^}]*overflow:hidden/,
+    "the document root must not inherit the studio scroll lock",
+  );
+  assert.match(
+    css,
+    /html,body\{[^}]*min-height:100%;[^}]*overflow-x:hidden/,
+  );
+  assert.match(css, /\.cms-shell\{height:100vh;[^}]*overflow:hidden/);
 });
