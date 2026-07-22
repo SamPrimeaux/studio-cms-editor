@@ -7,7 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 # vinext builds Next.js output — static assets served from the .next dir
 [assets]
 binding = "ASSETS"
-directory = "./.next/static"
+directory = "./dist/client"
 
 # ── D1 ────────────────────────────────────────────────────────────────────────
 [[d1_databases]]
