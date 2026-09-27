@@ -950,6 +950,33 @@ def build_database(
         extract_structured_content(conn, account_id, site_id)
         extract_components_and_candidates(conn, account_id, site_id, run_id)
         extract_assets(conn, account_id, site_id)
+
+        draft_id = stable_id("draft", account_id, site_id, "harvest-working")
+        stamp = now()
+        conn.execute(
+            """
+            INSERT INTO cms_drafts
+            (account_id,id,site_id,route_id,name,status,base_publication_id,
+             snapshot_json,created_at,updated_at)
+            VALUES (?,?,?,NULL,'Harvest working draft','working',NULL,?,?,?)
+            """,
+            (
+                account_id,
+                draft_id,
+                site_id,
+                jdump(
+                    {
+                        "schema": "agentsam.cms.local-draft.v1",
+                        "mode": "normalized-tables",
+                        "source": "harvest",
+                        "site_id": site_id,
+                        "base_publication": None,
+                    }
+                ),
+                stamp,
+                stamp,
+            ),
+        )
         conn.commit()
 
         tables = [
