@@ -291,3 +291,38 @@ CREATE TABLE IF NOT EXISTS tooling_probe_steps (
   stderr_text TEXT,
   FOREIGN KEY (probe_run_id) REFERENCES tooling_probe_runs(id) ON DELETE CASCADE
 );
+
+
+-- Historical archive/theme intake provenance.
+CREATE TABLE IF NOT EXISTS archive_ingests (
+  id TEXT PRIMARY KEY,
+  account_id TEXT NOT NULL,
+  site_id TEXT NOT NULL,
+  source_path TEXT NOT NULL,
+  source_kind TEXT NOT NULL,
+  source_sha256 TEXT,
+  quarantine_path TEXT NOT NULL,
+  classification TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  manifest_json TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS archive_files (
+  id TEXT PRIMARY KEY,
+  ingest_id TEXT NOT NULL,
+  relative_path TEXT NOT NULL,
+  bytes INTEGER NOT NULL,
+  sha256 TEXT NOT NULL,
+  category TEXT NOT NULL,
+  FOREIGN KEY (ingest_id) REFERENCES archive_ingests(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS archive_outputs (
+  id TEXT PRIMARY KEY,
+  ingest_id TEXT NOT NULL,
+  output_kind TEXT NOT NULL,
+  path TEXT NOT NULL,
+  bytes INTEGER NOT NULL,
+  sha256 TEXT NOT NULL,
+  FOREIGN KEY (ingest_id) REFERENCES archive_ingests(id) ON DELETE CASCADE
+);

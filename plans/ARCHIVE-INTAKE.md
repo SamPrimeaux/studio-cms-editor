@@ -115,3 +115,21 @@ For R2 later, prefer storing:
 - optimized media once in canonical asset storage instead of repeated inside many packages.
 
 No R2 upload is performed by this script.
+
+## One-shot tooling lab with dragged archives
+
+The full AgentSam acceptance lab now accepts archive paths positionally:
+
+```bash
+python3 scripts/harvest_tooling_lab.py \
+  --sdk /Users/samprimeaux/agentsam-sdk \
+  --replace-export \
+  --replace-db \
+  ~/Downloads/theme-one.zip \
+  ~/Backups/old-site.bundle \
+  ~/Backups/host-backup.tar.gz
+```
+
+This runs donor harvest -> local CMS SQLite -> archive intake -> AgentSam safe probes in one command.
+
+Use `--emit-zip` on `harvest_archive.py` only when a general ZIP is actually useful. Use `--emit-tar` only for tools that specifically require an uncompressed tar. The compact default remains `normalized-source.tar.gz`.

@@ -181,6 +181,7 @@ class Lab:
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("dragged_inputs", nargs="*", help="Optional dragged historical folders/.zip/.tar.gz/.bundle inputs.")
     ap.add_argument("--sdk", type=Path, default=Path.home() / "agentsam-sdk")
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--profile", choices=("safe", "local-full"), default="safe")
@@ -190,6 +191,8 @@ def main():
     ap.add_argument("--site-id", default="site_inneranimals")
     ap.add_argument("--scrape-url")
     ap.add_argument("--optimize-scrape-images", action="store_true")
+    ap.add_argument("--archive-input", action="append", default=[], help="Historical folder/.zip/.tar.gz/.bundle to intake; repeatable.")
+    ap.add_argument("--archive-emit-zip", action="store_true", help="Also emit normalized-source.zip for archive inputs.")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -211,6 +214,20 @@ def main():
 
     ok = True
     try:
+        archive_inputs = [*args.archive_input, *args.dragged_inputs]
+        if archive_inputs:
+            archive_cmd = [
+                py, str(ROOT / "scripts" / "harvest_archive.py"),
+                *[str(Path(p).expanduser().resolve()) for p in archive_inputs],
+                "--out", str(out), "--db", str(db),
+                "--account-id", args.account_id, "--site-id", args.site_id, "--replace"
+            ]
+            if args.archive_emit_zip:
+                archive_cmd.append("--emit-zip")
+            ok &= lab.run(
+                "archive-intake", "archive", archive_cmd, ROOT,
+                "harvest-local-write", "none"
+            )
         ok &= lab.run("agentsam-help", "cli", [node, agentsam, "--help"], sdk, "read-only", "none")
         ok &= lab.run(
             "site-scrape-unit", "scrape",

@@ -33,7 +33,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = ROOT.parent / "studio-cms-editor-harvest-export"
 SHOPIFY_DIRS = ("layout", "sections", "snippets", "templates", "config", "locales", "assets")
 JUNK_PARTS = {
-    "node_modules", ".next", "dist", "build", ".cache", ".parcel-cache",
+    "node_modules", ".git", ".next", "dist", "build", ".cache", ".parcel-cache",
     ".wrangler", ".vinext", "__pycache__", ".DS_Store",
 }
 CODE_EXTS = {
@@ -256,6 +256,8 @@ def inventory(source):
         if not path.is_file() or path.is_symlink():
             continue
         rel = path.relative_to(source).as_posix()
+        if is_junk(rel):
+            continue
         size = path.stat().st_size
         total += size
         ext = path.suffix.lower()
@@ -296,7 +298,23 @@ def write_zip_from_root(root, out_file, include_paths=None):
         else:
             paths = [p for p in root.rglob("*") if p.is_file() and not p.is_symlink()]
         for path in sorted(paths):
-            zf.write(path, path.relative_to(root).as_posix())
+            rel = path.relative_to(root).as_posix()
+            if is_junk(rel):
+                continue
+            zf.write(path, rel)
+    return out_file
+
+
+def write_tar(root, out_file):
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(out_file, "w") as tf:
+        for path in sorted(root.rglob("*")):
+            if not path.is_file() or path.is_symlink():
+                continue
+            rel = path.relative_to(root).as_posix()
+            if is_junk(rel):
+                continue
+            tf.add(path, arcname=rel, recursive=False)
     return out_file
 
 
@@ -306,7 +324,10 @@ def write_tar_gz(root, out_file):
         for path in sorted(root.rglob("*")):
             if not path.is_file() or path.is_symlink():
                 continue
-            tf.add(path, arcname=path.relative_to(root).as_posix(), recursive=False)
+            rel = path.relative_to(root).as_posix()
+            if is_junk(rel):
+                continue
+            tf.add(path, arcname=rel, recursive=False)
     return out_file
 
 
@@ -452,8 +473,10 @@ def process_one(path, out, args):
         copied, skipped, total = extract_gz(path, quarantine, max_bytes)
     elif kind == "git-bundle":
         repo_root, bundle_meta = extract_bundle(path, quarantine)
-        copied = [p.relative_to(quarantine).as_posix() for p in repo_root.rglob("*") if p.is_file()]
-        skipped, total = [], sum(p.stat().st_size for p in repo_root.rglob("*") if p.is_file())
+        copied = [p.relative_to(quarantine).as_posix() for p in repo_root.rglob("*") if p.is_file() and not is_junk(p.relative_to(quarantine).as_posix())]
+        skipped = []
+        total = sum(p.stat().st_size for p in repo_root.rglob("*") if p.is_file() and not is_junk(p.relative_to(quarantine).as_posix()))
+        ensure_limits(len(copied), total, args.max_files, max_bytes)
     else:
         target = quarantine / path.name
         shutil.copy2(path, target)
@@ -466,6 +489,10 @@ def process_one(path, out, args):
 
     archive_tar = write_tar_gz(quarantine, packages / "normalized-source.tar.gz")
     outputs.append(package_row(archive_tar, "normalized-tar.gz"))
+
+    if args.emit_tar:
+        portable_tar = write_tar(quarantine, packages / "normalized-source.tar")
+        outputs.append(package_row(portable_tar, "normalized-tar"))
 
     if args.emit_zip:
         portable_zip = write_zip_from_root(quarantine, packages / "normalized-source.zip")
@@ -552,6 +579,7 @@ def main():
     ap.add_argument("--site-id", default="site_inneranimals")
     ap.add_argument("--replace", action="store_true")
     ap.add_argument("--emit-zip", action="store_true", help="Also emit normalized-source.zip. tar.gz remains the compact default.")
+    ap.add_argument("--emit-tar", action="store_true", help="Also emit uncompressed normalized-source.tar for tooling that requires tar.")
     ap.add_argument("--include-build-junk", action="store_true", help="Include node_modules/build/cache directories in quarantine/repackages.")
     ap.add_argument("--max-files", type=int, default=50000)
     ap.add_argument("--max-unpacked-mb", type=int, default=2048)
