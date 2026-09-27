@@ -87,6 +87,12 @@ class Lab:
             if source.exists():
                 shutil.copy2(source, brand_input / source.name)
 
+        tiny_png = (
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwC"
+            "AAAAC0lEQVR42mP8/x8AAusB9WlC7uoAAAAASUVORK5CYII="
+        )
+        (brand_input / "optimizer-fixture.png").write_bytes(base64.b64decode(tiny_png))
+
         (self.fixture / "README.md").write_text(
             "# AgentSam acceptance fixture\nGenerated from studio-cms-editor harvest. Disposable local test material.\n"
         )
