@@ -267,6 +267,16 @@ def main():
                 ],
                 sdk, "fixture-local-write", "none", required=False
             )
+            ok &= lab.run(
+                "brand-image-optimize", "image",
+                [
+                    node, brand, "optimize",
+                    str(lab.fixture / "brand-input" / "optimizer-fixture.png"),
+                    "--role", "logo.primary", "--target", "web",
+                    "--cwd", str(lab.fixture), "--json", "--no-interactive"
+                ],
+                sdk, "fixture-local-write", "none"
+            )
 
         if args.scrape_url:
             env = os.environ.copy()
