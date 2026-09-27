@@ -9,6 +9,7 @@ Never deploys, publishes, syncs, uploads to R2, or writes remote Vectorize.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import re
