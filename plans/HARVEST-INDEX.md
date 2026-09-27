@@ -6,21 +6,24 @@ This branch turns `studio-cms-editor` into a donor source, not a new runtime aut
 
 The goal is to preserve everything valuable enough to repurpose while making it difficult to accidentally drag demo state, fake persistence, production-specific deployment glue, or generated artifacts into AgentSam SDK.
 
-Current local source truth at branch creation:
+Current source truth included by this harvest branch:
 
 - repository: `SamPrimeaux/studio-cms-editor`
-- source branch: `main`
-- source commit: `f76586b`
-- editor implementation: `app/page.tsx` (~75 KB)
-- editor styling: `app/globals.css` (~53 KB)
+- latest merged source baseline: `origin/main@f0547d7`
+- CMS editor: `app/studio/page.tsx`
+- shared editor styling: `app/globals.css`
+- public storefront implementation: `app/components/Storefront.tsx`
+- public storefront data: `app/storefront-data.ts`
+- public storefront styling: `app/storefront.css`
+- public routes: home, shop, collections, product, journal, story
 - ChatGPT-hosted identity reference: `app/chatgpt-auth.ts`
-- database schema: intentionally empty
-- production deployment glue exists, but is reference-only for harvesting
+- content implementation plan: `plans/INNERANIMALS-CONTENT-001.md`
+- database schema remains intentionally empty
 
 The source is valuable primarily as:
 
 1. a polished CMS/editor interaction donor,
-2. a layout/theme donor,
+2. a real public storefront/theme/layout donor,
 3. a ChatGPT identity integration reference,
 4. a historical system example for future AgentSam galleries.
 
@@ -48,7 +51,7 @@ Those actions belong to later explicit commands in the target system.
 
 Primary source:
 
-- `app/page.tsx`
+- `app/studio/page.tsx`
 - `app/globals.css`
 
 Keep or adapt the interaction ideas:
@@ -75,13 +78,24 @@ Keep or adapt the interaction ideas:
 
 Do not preserve simulated persistence as architecture.
 
-### B. Inner Animals theme/layout donor
+### B. Inner Animals storefront/theme donor
 
-The same editor source contains reusable page/section/layout concepts and styling. Treat these as material for a future package such as:
+Primary source:
+
+- `app/page.tsx`
+- `app/components/Storefront.tsx`
+- `app/storefront-data.ts`
+- `app/storefront.css`
+- `app/layout.tsx`
+- public storefront route files
+
+Treat this as candidate source for a future package such as:
 
 `@inneranimalmedia/theme-inneranimals-site`
 
-The harvest export preserves source verbatim. Normalizing into true section/block contracts happens inside the real CMS/theme implementation, not destructively in this donor repo.
+The harvest export preserves the route/layout/component/data source verbatim. Normalizing it into true section/block contracts happens inside the real CMS/theme implementation, not destructively in this donor repo.
+
+See `plans/STOREFRONT-SURFACE-MAP.md`.
 
 ### C. ChatGPT identity donor
 
@@ -99,7 +113,15 @@ Target architecture:
 
 Do not leak `oai-authenticated-*` headers into generic CMS contracts.
 
-### D. Runtime/deployment reference
+### D. Content-plan/reference donor
+
+Primary source:
+
+- `plans/INNERANIMALS-CONTENT-001.md`
+
+Keep as implementation intent/provenance. It should not override the reusable CMS/theme contracts.
+
+### E. Runtime/deployment reference
 
 Reference-only:
 
@@ -107,7 +129,9 @@ Reference-only:
 - `vite.config.ts`
 - `next.config.ts`
 - `worker/index.ts`
+- `worker/vpc.ts`
 - `wrangler.production.toml`
+- `docs/workers-vpc.md`
 - `package.json`
 
 These files explain how the old build ran. They are not candidates for automatic adoption into AgentSam SDK.
@@ -145,7 +169,17 @@ That directory is intentionally a quarantine/review surface.
 python3 scripts/preview_local.py
 ```
 
-This launches the existing local Vite/Vinext development surface only. It never deploys.
+Default browser target:
+
+`http://127.0.0.1:<port>/studio`
+
+Storefront remains available at:
+
+`http://127.0.0.1:<port>/`
+
+Use `--route /` if the storefront should open first.
+
+This launcher never deploys.
 
 ## Promotion rule
 

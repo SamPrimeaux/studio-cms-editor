@@ -59,9 +59,19 @@ def wait_for(url: str, process: subprocess.Popen, timeout: float = 45.0) -> bool
     return False
 
 
+def normalize_route(value: str) -> str:
+    value = value.strip() or "/studio"
+    return value if value.startswith("/") else f"/{value}"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=5173)
+    parser.add_argument(
+        "--route",
+        default="/studio",
+        help="Route to open after boot. Default: /studio. Use / for the storefront.",
+    )
     parser.add_argument("--no-browser", action="store_true")
     parser.add_argument(
         "--install",
@@ -91,7 +101,9 @@ def main() -> int:
         )
 
     port = find_port(args.port)
-    url = f"http://127.0.0.1:{port}/"
+    route = normalize_route(args.route)
+    base = f"http://127.0.0.1:{port}"
+    url = base + route
 
     env = os.environ.copy()
     env["WRANGLER_LOG_PATH"] = str(ROOT / ".wrangler" / "wrangler.log")
@@ -104,6 +116,9 @@ def main() -> int:
     ]
 
     print(f"Starting local preview: {url}")
+    print(f"  CMS Studio: {base}/studio")
+    print(f"  Storefront: {base}/")
+    print(f"  Shop:       {base}/shop")
     print("This command does not deploy or publish anything.")
     process = subprocess.Popen(
         cmd,

@@ -2,10 +2,9 @@
 """One-shot curated export for studio-cms-editor.
 
 Default behavior:
-  1. audit donor candidates,
-  2. create a sibling harvest export,
-  3. preserve source files verbatim by lane,
-  4. write provenance and a receipt.
+  1. copy curated donor source by lane,
+  2. preserve source files verbatim,
+  3. write provenance/history/receipt metadata.
 
 Optional --stage-sdk copies the finished export only into:
   <sdk>/apps/_incoming/studio-cms-editor-harvest
@@ -101,7 +100,7 @@ def write_candidate_notes(export_root: Path) -> None:
 Nothing in this directory is runtime authority.
 
 - cms-editor-primitives -> review against apps/client-cms-editor
-- theme-inneranimals-site -> normalize into a section/block-oriented theme package
+- theme-inneranimals-site -> normalize public routes/components/data into a section/block-oriented theme package
 - openai-identity -> use chatgpt-auth.ts only as transport/reference evidence
 - runtime-reference -> historical execution/deployment context only
 
@@ -117,8 +116,9 @@ Promotion into an active AgentSam package must be an explicit later change.
             "Do not preserve fake persistence or seeded customer/demo data as authority."
         ),
         "theme-inneranimals-site": (
-            "Normalize visual/layout behavior into tokens, sections, blocks, content "
-            "bindings, and sample content. Installing/previewing must not publish or sync."
+            "Preserve all public routes, Storefront component behavior, data shape, and CSS. "
+            "Normalize later into tokens, sections, blocks, and content bindings. "
+            "Installing/previewing must not publish or sync."
         ),
         "openai-identity": (
             "Map hosted ChatGPT identity into AgentSam NormalizedExternalIdentity. "
@@ -132,6 +132,22 @@ Promotion into an active AgentSam package must be an explicit later change.
         d = candidates / name
         d.mkdir(parents=True, exist_ok=True)
         (d / "NOTES.md").write_text(body + "\n", encoding="utf-8")
+
+
+def write_history(export_root: Path, manifest: dict) -> None:
+    paths = []
+    seen = set()
+    for lane in manifest["lanes"].values():
+        for rel in lane.get("files", []):
+            if rel not in seen:
+                seen.add(rel)
+                paths.append(rel)
+
+    cmd = ["log", "--date=short", "--pretty=format:%h %ad %s", "--", *paths]
+    history = git(*cmd)
+    (export_root / "PROVENANCE_HISTORY.txt").write_text(
+        history + ("\n" if history else ""), encoding="utf-8"
+    )
 
 
 def validate_sdk(path: Path) -> Path:
@@ -221,6 +237,7 @@ def main() -> int:
         copied_by_lane[lane_name] = copy_lane_files(export_root, lane_name, lane)
 
     write_candidate_notes(export_root)
+    write_history(export_root, manifest)
 
     plans_dir = export_root / "plans"
     plans_dir.mkdir(parents=True, exist_ok=True)
@@ -245,6 +262,7 @@ def main() -> int:
             "cms_publish": False,
             "asset_upload": False,
             "database_write": False,
+            "active_sdk_package_write": False
         },
     }
     (export_root / "HARVEST_RECEIPT.json").write_text(

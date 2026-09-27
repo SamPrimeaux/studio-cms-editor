@@ -2,7 +2,7 @@
 
 ## Goal
 
-Turn the useful visual/layout language in this donor into a reusable theme/preset candidate without making the donor repo or its content the runtime authority.
+Turn the useful public storefront and visual/layout language in this donor into a reusable theme/preset candidate without making the donor repo or its content the runtime authority.
 
 Potential destination:
 
@@ -11,6 +11,28 @@ Potential destination:
 Potential gallery destination:
 
 `apps/theme-gallery-preview/themes/inneranimals-site`
+
+## Current donor source
+
+The latest merged source separates the public website from the CMS editor.
+
+Public/theme donor:
+
+- `app/page.tsx`
+- `app/components/Storefront.tsx`
+- `app/storefront-data.ts`
+- `app/storefront.css`
+- `app/layout.tsx`
+- `app/shop/page.tsx`
+- `app/collections/[slug]/page.tsx`
+- `app/product/[slug]/page.tsx`
+- `app/journal/page.tsx`
+- `app/journal/[slug]/page.tsx`
+- `app/story/page.tsx`
+
+CMS editor donor remains separate at `app/studio/page.tsx`.
+
+See `STOREFRONT-SURFACE-MAP.md` for the route-to-theme mapping.
 
 ## Preserve
 
@@ -25,12 +47,13 @@ Preserve source-level evidence for:
 - footer patterns
 - content widths
 - responsive behavior
-- section visibility
-- section-specific styling
-- page metadata patterns
+- product/store behavior
+- collection behavior
+- journal/editorial behavior
+- story/brand narrative behavior
 - reusable component/template ideas
 
-The harvest export intentionally copies the original editor source and CSS intact so no layout behavior is lost before normalization.
+The harvest export intentionally copies the original source and CSS intact so no layout behavior is lost before normalization.
 
 ## Normalize later
 
@@ -50,33 +73,24 @@ The real theme implementation should separate:
 ### Content bindings
 
 - nav links
-- hero eyebrow/title/body
+- hero copy/media
 - CTAs
-- logo/client names
-- services
-- projects
-- testimonials
-- contact CTA
+- collections
+- product fields
+- archetypes
+- journal entries
+- story content
 - footer links
 
 ### CMS blocks
 
 If the old source is not truly block-oriented, do not fake it during harvest.
 
-Normalize during implementation into explicit blocks such as:
-
-- navigation
-- hero
-- logo cloud
-- feature/service grid
-- gallery
-- testimonial
-- CTA
-- footer
+Normalize during implementation into explicit blocks/sections.
 
 ## Content rule
 
-Historical Inner Animal Media copy may be useful for a live historical preview, but should not silently become generic scaffold copy for unrelated customer sites.
+Historical Inner Animals copy may be useful for a live historical preview, but should not silently become generic scaffold copy for unrelated customer sites.
 
 The reusable package should distinguish:
 
